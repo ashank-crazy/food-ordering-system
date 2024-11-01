@@ -1,14 +1,16 @@
 package admin;
 
+import models.FoodItem;
 import models.User;
 import utils.MenuManager;
 import utils.OrderManager;
 
 import java.util.Scanner;
+import java.util.UUID;
 
 public class Admin extends User
 {
-    private MenuManager menuManager = new MenuManager();
+    private final MenuManager menuManager = new MenuManager();
     private final OrderManager orderManager = new OrderManager();
 
     public Admin(String name, String email, String password, String type)
@@ -62,13 +64,23 @@ public class Admin extends User
                     verified_admin.viewPendingOrders();
                     break;
                 case "2":
-                    verified_admin.updateOrderStatus();
+                    System.out.println("Enter the order ID to update:");
+                    UUID orderId = UUID.fromString(scanner.nextLine());
+                    System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
+                    String newStatus = scanner.nextLine();
+                    orderManager.updateOrderStatus(orderId, newStatus);
                     break;
                 case "3":
-                    verified_admin.processRefunds();
+                    System.out.println("Enter the order ID to refund:");
+                    UUID refundOrderId = UUID.fromString(scanner.nextLine());
+                    orderManager.processRefund(refundOrderId);
                     break;
                 case "4":
-                    verified_admin.handleSpecialRequests();
+                    System.out.println("Enter the order ID for the special request:");
+                    UUID specialRequestOrderId = UUID.fromString(scanner.nextLine());
+                    System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
+                    String request = scanner.nextLine();
+                    orderManager.handleSpecialRequest(specialRequestOrderId, request);
                     break;
                 case "5":
                     return;
@@ -81,15 +93,68 @@ public class Admin extends User
 
     public void addFoodItem()
     {
-//        menuManager.addItem(item);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter item name:");
+        String name = scanner.nextLine();
+
+        if (menuManager.findItemByName(name) != null)
+        {
+            System.out.println("Item already exists. Try updating it instead.");
+            return;
+        }
+
+        System.out.println("Enter item price:");
+        double price = scanner.nextDouble();
+        scanner.nextLine();
+
+        System.out.println("Enter item category:");
+        String category = scanner.nextLine();
+
+        System.out.println("Is the item available? (true/false):");
+        boolean available = scanner.nextBoolean();
+
+        FoodItem newItem = new FoodItem(name, price, category, available);
+        menuManager.addItem(newItem);
     }
 
     public void updateFoodItem()
     {
-//        item.setPrice(newPrice);
-//        item.setAvailability(availability);
-//        menuManager.updateItem(item);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter item name to update:");
+        String name = scanner.nextLine();
+
+        if (menuManager.findItemByName(name) == null)
+        {
+            System.out.println("Item not found on the menu. Try adding it first.");
+            return;
+        }
+
+        System.out.println("Enter new price:");
+        double price = scanner.nextDouble();
+
+        System.out.println("Is the item available? (true/false):");
+        boolean available = scanner.nextBoolean();
+
+        menuManager.updateItem(name, price, available);
     }
+
+
+    public void removeItem()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter item name to remove:");
+        String name = scanner.nextLine();
+
+        if (menuManager.findItemByName(name) == null)
+        {
+            System.out.println("Item not found on the menu.");
+            return;
+        }
+
+        menuManager.removeItem(name);
+        System.out.println("WARNING !\nOrders containing the item will be denied.");
+    }
+
 
     public void viewPendingOrders()
     {
@@ -100,9 +165,6 @@ public class Admin extends User
     {
 //        order.updateStatus(status);
 //        orderManager.processOrder(order);
-    }
-
-    public void removeItem() {
     }
 
     public void processRefunds() {

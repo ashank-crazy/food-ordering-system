@@ -36,4 +36,8 @@ public abstract class User implements Systeminterface
     }
 
     public abstract void showMenu();
+
+    protected String getName() {
+        return name;
+    }
 }

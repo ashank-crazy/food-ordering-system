@@ -2,22 +2,74 @@ package utils;
 
 import models.Order;
 import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.UUID;
 
 public class OrderManager
 {
-    private PriorityQueue<Order> orderQueue = new PriorityQueue<>((o1, o2) -> {
-        if (o1.getCustomerType().equals("VIP") && o2.getCustomerType().equals("Regular")) return -1;
-        else if (o1.getCustomerType().equals("Regular") && o2.getCustomerType().equals("VIP")) return 1;
-        return 0;
-    });
+    private final Queue<Order> orderQueue;
 
-    public void processOrder(Order order)
+    public OrderManager()
+    {
+        orderQueue = new PriorityQueue<>((o1, o2) -> {
+            if (o1.isVIP() && !o2.isVIP()) return -1;
+            if (!o1.isVIP() && o2.isVIP()) return 1;
+            return 0;
+        });
+    }
+
+    public void addOrder(Order order)
     {
         orderQueue.add(order);
+        System.out.println("Order added: " + order);
     }
 
     public void viewPendingOrders()
     {
-        orderQueue.forEach(order -> System.out.println("Order Status: " + order.getStatus()));
+        System.out.println("Pending Orders:");
+        for (Order order : orderQueue)
+            System.out.println(order);
+    }
+
+    public void updateOrderStatus(UUID orderId, String newStatus)
+    {
+        for (Order order : orderQueue)
+        {
+            if (order.getOrderId().equals(orderId))
+            {
+                order.updateStatus(newStatus);
+                System.out.println("Order status updated: " + order);
+                return;
+            }
+        }
+        System.out.println("Order not found with ID: " + orderId);
+    }
+
+    public void processRefund(UUID orderId)
+    {
+        for (Order order : orderQueue)
+        {
+            if (order.getOrderId().equals(orderId))
+            {
+                order.processRefund();
+                orderQueue.remove(order);
+                return;
+            }
+        }
+        System.out.println("Order not found with ID: " + orderId);
+    }
+
+    public void handleSpecialRequest(UUID orderId, String request)
+    {
+        for (Order order : orderQueue)
+        {
+            if (order.getOrderId().equals(orderId))
+            {
+                order.updateStatus("Special request: " + request);
+                System.out.println("Special request updated for order ID: " + orderId);
+                return;
+            }
+        }
+        System.out.println("Order not found with ID: " + orderId);
     }
 }

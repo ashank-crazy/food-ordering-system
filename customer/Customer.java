@@ -149,7 +149,10 @@ public class Customer extends User {
 
     public Order checkout()
     {
-        return new Order(cart, "Regular");
+        Order newOrder = new Order(cart, "Regular");
+        System.out.println("Regular order placed: " + newOrder);
+        cart.clear();
+        return newOrder;
     }
 
     @Override
@@ -162,7 +165,8 @@ public class Customer extends User {
         System.out.println("2. Cart Operations");
         System.out.println("3. Order Tracking");
         System.out.println("4. Item Reviews");
-        System.out.println("5. Logout");
+        System.out.println("5. Upgrade to VIP");
+        System.out.println("6. Logout");
         System.out.println("-------------------------------------------------------");
     }
 
@@ -247,5 +251,20 @@ public class Customer extends User {
     }
 
     public void viewReviews() {
+    }
+
+    public void upgradeToVIP(Customer verified_customer)
+    {
+        if (verified_customer instanceof VIPCustomer)
+        {
+            System.out.println("Already a VIP customer.");
+            return;
+        }
+
+        VIPCustomer vipCustomer = new VIPCustomer(getName(), getEmail(), getPassword(), "VIP");
+        vipCustomer.cart = this.cart;
+        System.out.println("Congratulations ! \nYou have successfully upgraded to VIP !");
+        System.out.println("The Orders you place now onwards will be prioritized\n" +
+                            "Unfortunately we cannot do anything about older orders");
     }
 }

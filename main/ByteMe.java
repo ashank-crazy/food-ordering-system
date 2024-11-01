@@ -196,7 +196,7 @@ public class ByteMe {
         Scanner scanner = new Scanner(System.in);
         String query = "";
 
-        while(!query.equals("5"))
+        while(!query.equals("6"))
         {
             verified_customer.showMenu();
             query = scanner.nextLine();
@@ -216,6 +216,9 @@ public class ByteMe {
                     verified_customer.itemReviews(verified_customer);
                     break;
                 case "5":
+                    verified_customer.upgradeToVIP(verified_customer);
+                    break;
+                case "6":
                     System.out.println("\nSuccessfully Logged Out ! ");
                     return;
                 default:

@@ -2,9 +2,9 @@ package models;
 
 public class FoodItem
 {
-    private String name;
+    private final String name;
     private double price;
-    private String category;
+    private final String category;
     private boolean available;
 
     public FoodItem(String name, double price, String category, boolean available)
@@ -22,4 +22,15 @@ public class FoodItem
 
     public void setPrice(double price) { this.price = price; }
     public void setAvailability(boolean available) { this.available = available; }
+
+    @Override
+    public String toString()
+    {
+        return "FoodItem{" +
+                "name='" + name + '\'' +
+                ", price=" + price +
+                ", category='" + category + '\'' +
+                ", available=" + available +
+                '}';
+    }
 }
