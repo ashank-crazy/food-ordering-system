@@ -1,6 +1,6 @@
-package Utils;
+package utils;
 
-import Models.FoodItem;
+import models.FoodItem;
 import java.util.ArrayList;
 import java.util.List;
 

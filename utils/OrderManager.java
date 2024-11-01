@@ -1,6 +1,6 @@
-package Utils;
+package utils;
 
-import Models.Order;
+import models.Order;
 import java.util.PriorityQueue;
 
 public class OrderManager

@@ -1,4 +1,4 @@
-package Models;
+package models;
 
 public abstract class User implements Systeminterface
 {
@@ -35,5 +35,5 @@ public abstract class User implements Systeminterface
         return type;
     }
 
-    public abstract void displayMenu();
+    public abstract void showMenu();
 }

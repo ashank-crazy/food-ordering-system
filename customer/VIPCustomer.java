@@ -1,6 +1,6 @@
-package Customer;
+package customer;
 
-import Models.Order;
+import models.Order;
 
 public class VIPCustomer extends Customer
 {

@@ -1,11 +1,9 @@
 package main;
 
-import Customer.VIPCustomer;
-import Models.User;
-import Utils.MenuManager;
-import Utils.OrderManager;
-import Admin.Admin;
-import Customer.*;
+import models.User;
+import admin.Admin;
+import customer.*;
+import Exceptions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +14,7 @@ public class ByteMe {
     static ArrayList<Customer> Customers = new ArrayList<>();
     static ArrayList<Admin> Admins = new ArrayList<>();
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws InvalidLoginException {
         Scanner scanner = new Scanner(System.in);
 
         while(true)
@@ -46,22 +43,27 @@ public class ByteMe {
     }
 
     private static void loginmenu() {
-        Scanner scanner = new Scanner(System.in);
-        String select = scanner.nextLine();
+        try {
+            Scanner scanner = new Scanner(System.in);
+            String select = scanner.nextLine();
 
-        switch(select)
+            switch (select) {
+                case "1":
+                    authenticate_user("customer");
+                    break;
+                case "2":
+                    authenticate_user("admin");
+                    break;
+                case "3":
+                    return;
+                default:
+                    System.out.println("\nPlease choose a valid option");
+                    break;
+            }
+        }
+        catch (Exception e)
         {
-            case "1":
-                authenticate_user("Student");
-                break;
-            case "2":
-                authenticate_user("Admin");
-                break;
-            case "3":
-                return;
-            default:
-                System.out.println("Please choose a valid option");
-                break;
+            System.out.println("Error 101 : Login menu " + e.getMessage());
         }
     }
 
@@ -72,90 +74,155 @@ public class ByteMe {
         String password = "";
         String name = "";
 
-        if(select.equals("1") || select.equals("2"))
-        {
-            System.out.println("Enter your email id");
-            email = scanner.nextLine();
+        try {
+            if (select.equals("1") || select.equals("2")) {
+                System.out.println("\nEnter your email id");
+                email = scanner.nextLine();
 
-            if(Users.containsKey(email))
-            {
-                System.out.println("User with this email already exists. Please try logging in");
-                return;
-            }
-
-            System.out.println("Choose your Password");
-            password = scanner.nextLine();
-        }
-
-        switch(select)
-        {
-            case "1":
-                Customer newCustomer = new Customer(name, email, password, "Customer");
-                Customers.add(newCustomer);
-                Users.put(email, newCustomer);
-                System.out.println("Signup Successful ! you may login now");
-                break;
-            case "2":
-                Admin newAdmin = new Admin(name, email, password, "Admin");
-                Admins.add(newAdmin);
-                Users.put(email, newAdmin);
-                System.out.println("Signup Successful ! you may login now");
-                break;
-            case "3":
-                return;
-            default:
-                System.out.println("Please choose a valid option");
-                break;
-        }
-    }
-
-    public static void authenticate_user(String userType)
-    {
-        Scanner scanner = new Scanner(System.in);
-        int attempts = 5;
-
-        while (attempts > 0)
-        {
-            System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
-            String email = scanner.nextLine();
-
-            if (email.equalsIgnoreCase("back"))
-                return;
-
-            System.out.println("Enter your password: ");
-            String password = scanner.nextLine();
-
-            if (Users.containsKey(email))
-            {
-                User user = Users.get(email);
-
-                if (user.authenticate(password, userType))
-                {
-                    System.out.println("Login Successful");
-
-                    if (user instanceof Customer verified_customer)
-                        handleCustomerMenu(verified_customer);
-                    else if (user instanceof Admin verified_admin)
-                        handleAdminMenu(verified_admin);
+                if (Users.containsKey(email)) {
+                    System.out.println("\nUser with this email already exists. Please try logging in");
                     return;
                 }
-                else
-                    System.out.println("Incorrect Password, Try Again");
+
+                System.out.println("\nChoose your Password");
+                password = scanner.nextLine();
             }
-            else
-                System.out.println("Incorrect Email, Try again");
 
-            attempts--;
-            System.out.println("Attempts remaining: " + attempts);
+            switch (select) {
+                case "1":
+                    Customer newCustomer = new Customer(name, email, password, "customer");
+                    Customers.add(newCustomer);
+                    Users.put(email, newCustomer);
+                    System.out.println("\nSignup Successful ! you may login now");
+                    break;
+                case "2":
+                    Admin newAdmin = new Admin(name, email, password, "admin");
+                    Admins.add(newAdmin);
+                    Users.put(email, newAdmin);
+                    System.out.println("\nSignup Successful ! you may login now");
+                    break;
+                case "3":
+                    return;
+                default:
+                    System.out.println("\nPlease choose a valid option");
+                    break;
+            }
         }
-
-        System.out.println("Too many failed attempts");
+        catch (Exception e)
+        {
+            System.out.println("Error 102 : Signup menu " + e.getMessage());
+        }
     }
 
-    private static void handleAdminMenu(User verifiedAdmin) {
+    public static void authenticate_user(String userType) throws InvalidLoginException
+    {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            int attempts = 5;
+
+            while (attempts > 0) {
+                System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
+                String email = scanner.nextLine();
+
+                if (email.equalsIgnoreCase("back"))
+                    return;
+
+                System.out.println("Enter your password: ");
+                String password = scanner.nextLine();
+
+                if (Users.containsKey(email)) {
+                    User user = Users.get(email);
+
+                    if (user.authenticate(password, userType)) {
+                        System.out.println("Login Successful");
+
+                        if (user instanceof Customer verified_customer)
+                            handleCustomerMenu(verified_customer);
+                        else if (user instanceof Admin verified_admin)
+                            handleAdminMenu(verified_admin);
+                        return;
+                    } else
+                        System.out.println("Incorrect Password, Try Again");
+                } else
+                    System.out.println("Incorrect Email, Try again");
+
+                attempts--;
+                System.out.println("Attempts remaining: " + attempts);
+            }
+
+            throw new InvalidLoginException("Too many failed attempts to login.");
+        }
+        catch (InvalidLoginException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error 103 : user authentication " + e.getMessage());
+        }
     }
 
-    private static void handleCustomerMenu(User verifiedCustomer) {
+    private static void handleAdminMenu(Admin verified_admin) {
+        Scanner scanner = new Scanner(System.in);
+        String query = "";
+
+        while(!query.equals("4"))
+        {
+            verified_admin.showMenu();
+            query = scanner.nextLine();
+
+            switch(query)
+            {
+                case "1":
+                    verified_admin.menuManagement(verified_admin);
+                    break;
+                case "2":
+                    verified_admin.orderManagement(verified_admin);
+                    break;
+                case "3":
+                    verified_admin.generateSalesReport(verified_admin);
+                    break;
+                case "4":
+                    System.out.println("\nSuccessfully Logged Out ! ");
+                    return;
+                default:
+                    System.out.println("\nPlease choose a valid option");
+                    break;
+            }
+        }
+    }
+
+    private static void handleCustomerMenu(Customer verified_customer) {
+        Scanner scanner = new Scanner(System.in);
+        String query = "";
+
+        while(!query.equals("5"))
+        {
+            verified_customer.showMenu();
+            query = scanner.nextLine();
+
+            switch(query)
+            {
+                case "1":
+                    verified_customer.browseMenu(verified_customer);
+                    break;
+                case "2":
+                    verified_customer.cartOperations(verified_customer);
+                    break;
+                case "3":
+                    verified_customer.orderTracking(verified_customer);
+                    break;
+                case "4":
+                    verified_customer.itemReviews(verified_customer);
+                    break;
+                case "5":
+                    System.out.println("\nSuccessfully Logged Out ! ");
+                    return;
+                default:
+                    System.out.println("\nPlease choose a valid option");
+                    break;
+            }
+        }
     }
 
     public static void mainmenu3()
