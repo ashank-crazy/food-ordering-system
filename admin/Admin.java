@@ -1,12 +1,13 @@
 package admin;
 
 import models.FoodItem;
+import models.Order;
 import models.User;
 import utils.MenuManager;
 import utils.OrderManager;
 
-import java.util.Scanner;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 
 public class Admin extends User
 {
@@ -64,23 +65,44 @@ public class Admin extends User
                     verified_admin.viewPendingOrders();
                     break;
                 case "2":
-                    System.out.println("Enter the order ID to update:");
-                    UUID orderId = UUID.fromString(scanner.nextLine());
-                    System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
-                    String newStatus = scanner.nextLine();
-                    orderManager.updateOrderStatus(orderId, newStatus);
+                    try
+                    {
+                        System.out.println("Enter the order ID to update:");
+                        UUID orderId = UUID.fromString(scanner.nextLine());
+                        System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
+                        String newStatus = scanner.nextLine();
+                        orderManager.updateOrderStatus(orderId, newStatus);
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
+                    }
                     break;
                 case "3":
-                    System.out.println("Enter the order ID to refund:");
-                    UUID refundOrderId = UUID.fromString(scanner.nextLine());
-                    orderManager.processRefund(refundOrderId);
+                    try
+                    {
+                        System.out.println("Enter the order ID to refund:");
+                        UUID refundOrderId = UUID.fromString(scanner.nextLine());
+                        orderManager.processRefund(refundOrderId);
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
+                    }
                     break;
                 case "4":
-                    System.out.println("Enter the order ID for the special request:");
-                    UUID specialRequestOrderId = UUID.fromString(scanner.nextLine());
-                    System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
-                    String request = scanner.nextLine();
-                    orderManager.handleSpecialRequest(specialRequestOrderId, request);
+                    try
+                    {
+                        System.out.println("Enter the order ID for the special request:");
+                        UUID specialRequestOrderId = UUID.fromString(scanner.nextLine());
+                        System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
+                        String request = scanner.nextLine();
+                        orderManager.handleSpecialRequest(specialRequestOrderId, request);
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
+                    }
                     break;
                 case "5":
                     return;
@@ -173,8 +195,43 @@ public class Admin extends User
     public void handleSpecialRequests() {
     }
 
-    public void generateSalesReport(Admin verified_admin) {
+    public void generateSalesReport()
+    {
+        LocalDate today = LocalDate.now();
+        List<Order> orders = orderManager.getOrdersForDate(today);
+        double totalSales = 0.0;
+        Map<String, Integer> itemCountMap = new HashMap<>();
+
+        for (Order order : orders)
+        {
+            totalSales += order.getTotalPrice();
+            for (FoodItem item : order.getItems())
+            {
+                itemCountMap.put(item.getName(), itemCountMap.getOrDefault(item.getName(), 0) + 1);
+            }
+        }
+
+        String mostPopularItem = null;
+        int highestCount = 0;
+        for (Map.Entry<String, Integer> entry : itemCountMap.entrySet())
+        {
+            if (entry.getValue() > highestCount)
+            {
+                highestCount = entry.getValue();
+                mostPopularItem = entry.getKey();
+            }
+        }
+
+        System.out.println("-------------------------------------------------------");
+        System.out.println("-                  Daily Sales Report                 -");
+        System.out.println("-------------------------------------------------------");
+        System.out.println("Date: " + today);
+        System.out.println("Total Sales: $" + String.format("%.2f", totalSales));
+        System.out.println("Total Orders: " + orders.size());
+        System.out.println("Most Popular Item: " + (mostPopularItem != null ? mostPopularItem : "N/A"));
+        System.out.println("-------------------------------------------------------");
     }
+
 
     @Override
     public void showMenu() {
@@ -196,7 +253,7 @@ public class Admin extends User
         System.out.println("-------------------------------------------------------");
         System.out.println("1. Add Food Item");
         System.out.println("2. Update Food Item");
-        System.out.println("3. Return Food Item");
+        System.out.println("3. Remove Food Item");
         System.out.println("4. Go Back");
         System.out.println("-------------------------------------------------------");
     }

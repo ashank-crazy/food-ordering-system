@@ -14,7 +14,8 @@ public class ByteMe {
     static ArrayList<Customer> Customers = new ArrayList<>();
     static ArrayList<Admin> Admins = new ArrayList<>();
 
-    public static void main(String[] args) throws InvalidLoginException {
+    public static void main(String[] args)
+    {
         Scanner scanner = new Scanner(System.in);
 
         while(true)
@@ -42,7 +43,8 @@ public class ByteMe {
         }
     }
 
-    private static void loginmenu() {
+    private static void loginmenu()
+    {
         try {
             Scanner scanner = new Scanner(System.in);
             String select = scanner.nextLine();
@@ -150,7 +152,7 @@ public class ByteMe {
                 System.out.println("Attempts remaining: " + attempts);
             }
 
-            throw new InvalidLoginException("Too many failed attempts to login.");
+            throw new InvalidLoginException("\nToo many failed attempts to login.");
         }
         catch (InvalidLoginException e)
         {
@@ -180,7 +182,7 @@ public class ByteMe {
                     verified_admin.orderManagement(verified_admin);
                     break;
                 case "3":
-                    verified_admin.generateSalesReport(verified_admin);
+                    verified_admin.generateSalesReport();
                     break;
                 case "4":
                     System.out.println("\nSuccessfully Logged Out ! ");
@@ -233,7 +235,7 @@ public class ByteMe {
         System.out.println("-------------------------------------------------------");
         System.out.println("-                    SignUp Menu                      -");
         System.out.println("-------------------------------------------------------");
-        System.out.println("1. Signup as Student");
+        System.out.println("1. Signup as Customer");
         System.out.println("2. Signup as Administrator");
         System.out.println("3. Go Back");
         System.out.println("-------------------------------------------------------");

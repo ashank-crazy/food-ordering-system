@@ -1,5 +1,6 @@
 package models;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public class Order
     private String status;
     private String specialRequest;
     private final boolean isVIP;
+    private OffsetDateTime orderDate;
 
     public Order(List<FoodItem> items, String customerType)
     {
@@ -19,6 +21,7 @@ public class Order
         this.items = items;
         this.status = "Pending";
         this.isVIP = "VIP".equalsIgnoreCase(customerType);
+        OffsetDateTime orderDate = OffsetDateTime.now();
     }
 
     public UUID getOrderId() { return orderId; }
@@ -40,5 +43,18 @@ public class Order
                 ", status='" + status + '\'' +
                 ", isVIP=" + isVIP +
                 '}';
+    }
+
+    public double getTotalPrice() {
+        double total = 0.0;
+        for (FoodItem item : items)
+        {
+            total += item.getPrice();
+        }
+        return total;
+    }
+
+    public OffsetDateTime getOrderDate() {
+        return orderDate;
     }
 }

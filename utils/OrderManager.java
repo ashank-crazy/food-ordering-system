@@ -1,9 +1,13 @@
 package utils;
 
 import models.Order;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.ArrayList;
 
 public class OrderManager
 {
@@ -71,5 +75,17 @@ public class OrderManager
             }
         }
         System.out.println("Order not found with ID: " + orderId);
+    }
+
+    public ArrayList<Order> getOrdersForDate(LocalDate today) {
+        ArrayList<Order> ordersForDate = new ArrayList<>();
+
+        for (Order order : orderQueue) {
+            if (order.getOrderDate().isEqual(OffsetDateTime.from(today))) {
+                ordersForDate.add(order);
+            }
+        }
+
+        return ordersForDate;
     }
 }
