@@ -4,16 +4,19 @@ import models.Order;
 import models.FoodItem;
 import models.User;
 import utils.MenuManager;
+import utils.OrderManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Customer extends User {
-    protected List<FoodItem> cart = new ArrayList<>();
     protected Map<FoodItem, Integer> cartMap = new HashMap<>();
     protected List<Order> orderHistory = new ArrayList<>();
     protected Order currentOrder;
     private final Map<FoodItem, List<String>> reviews = new HashMap<>();
     private final MenuManager menuManager = MenuManager.getInstance();
+    private final OrderManager orderManager = OrderManager.getInstance();
+
 
     public Customer(String name, String email, String password, String type) {
         super(name, email, password, type);
@@ -188,8 +191,10 @@ public class Customer extends User {
         currentOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
         currentOrder.setPaymentDetails(paymentDetails);
         currentOrder.setDeliveryAddress(deliveryAddress);
+        currentOrder.updateStatus("Order Placed");
 
-        System.out.println("Order placed: " + currentOrder);
+        orderManager.addOrder(currentOrder);
+        System.out.println("Regular order placed: " + currentOrder);
         orderHistory.add(currentOrder);
         cartMap.clear();
     }
@@ -303,7 +308,7 @@ public class Customer extends User {
 
         List<FoodItem> results = menuManager.getMenu().stream()
                 .filter(item -> item.getName().toLowerCase().contains(keyword))
-                .toList();
+                .collect(Collectors.toList());
 
         if (results.isEmpty()) {
             System.out.println("No items found matching your search.");
@@ -342,7 +347,7 @@ public class Customer extends User {
 
         List<FoodItem> filteredItems = menuManager.getMenu().stream()
                 .filter(item -> item.getCategory().toLowerCase().equals(category))
-                .toList();
+                .collect(Collectors.toList());
 
         if (filteredItems.isEmpty()) {
             System.out.println("No items found in this category.");
@@ -361,11 +366,6 @@ public class Customer extends User {
         System.out.println("Total price of items in cart: " + total + " Rs");
     }
 
-    private FoodItem findMenuItemByName(String name)
-    {
-        return menuManager.findItemByName(name);
-    }
-
     public void viewOrderStatus()
     {
         if (currentOrder == null) {
@@ -378,47 +378,24 @@ public class Customer extends User {
     public void cancelOrder()
     {
         if (currentOrder == null) {
-            System.out.println("No active orders to cancel.");
+            System.out.println("No current order to cancel.");
             return;
         }
-
-        if (currentOrder.getStatus().equals("Preparing") || currentOrder.getStatus().equals("Out for Delivery")) {
-            System.out.println("Order cannot be canceled as it is already being prepared or out for delivery.");
-            return;
-        }
-
-        currentOrder.updateStatus("Canceled");
-        System.out.println("Your order has been successfully canceled.");
+        orderManager.cancelOrder(currentOrder);
         currentOrder = null;
+        System.out.println("Order has been canceled.");
     }
 
     public void viewOrderHistory()
     {
         if (orderHistory.isEmpty()) {
-            System.out.println("No past orders to display.");
+            System.out.println("No order history.");
             return;
         }
-
         System.out.println("Order History:");
-        for (int i = 0; i < orderHistory.size(); i++) {
-            Order order = orderHistory.get(i);
-            System.out.println((i + 1) + ". " + order);
+        for (Order order : orderHistory) {
+            System.out.println(order);
         }
-
-        System.out.println("Would you like to reorder any past item? Enter the number or '0' to go back:");
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt();
-
-        if (choice > 0 && choice <= orderHistory.size())
-            reorder(orderHistory.get(choice - 1));
-        else
-            System.out.println("Returning to previous menu.");
-    }
-
-    private void reorder(Order pastOrder)
-    {
-        currentOrder = new Order(pastOrder.getItems(), (pastOrder.isVIP() ? "VIP" : "Regular"));
-        System.out.println("Reordered items: " + currentOrder);
     }
 
     public void provideReview()
@@ -457,18 +434,23 @@ public class Customer extends User {
         }
     }
 
-    public void upgradeToVIP(Customer verified_customer)
+    public VIPCustomer upgradeToVIP(Customer verified_customer)
     {
-        if (verified_customer instanceof VIPCustomer)
-        {
+        if (verified_customer instanceof VIPCustomer) {
             System.out.println("Already a VIP customer.");
-            return;
+            return (VIPCustomer) verified_customer;
         }
 
         VIPCustomer vipCustomer = new VIPCustomer(getName(), getEmail(), getPassword(), "VIP");
-        vipCustomer.cart = this.cart;
-        System.out.println("Congratulations ! \nYou have successfully upgraded to VIP !");
-        System.out.println("The Orders you place now onwards will be prioritized\n" +
-                            "Unfortunately we cannot do anything about older orders");
+        vipCustomer.cartMap.putAll(verified_customer.cartMap);
+        vipCustomer.orderHistory.addAll(verified_customer.orderHistory);
+        if (verified_customer.currentOrder != null) {
+            vipCustomer.currentOrder = verified_customer.currentOrder;
+        }
+
+        System.out.println("Congratulations!\nYou have successfully upgraded to VIP!");
+        System.out.println("Your orders will now be prioritized.");
+
+        return vipCustomer;
     }
 }

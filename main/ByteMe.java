@@ -218,7 +218,7 @@ public class ByteMe {
                     verified_customer.itemReviews(verified_customer);
                     break;
                 case "5":
-                    verified_customer.upgradeToVIP(verified_customer);
+                    verified_customer = verified_customer.upgradeToVIP(verified_customer);
                     break;
                 case "6":
                     System.out.println("\nSuccessfully Logged Out ! ");

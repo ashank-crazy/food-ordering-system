@@ -15,6 +15,7 @@ public class Order
     private final OffsetDateTime orderDate;
     private String paymentDetails;
     private String deliveryAddress;
+    private boolean completed;
 
     public Order(List<FoodItem> items, String customerType)
     {
@@ -24,24 +25,27 @@ public class Order
         this.status = "Pending";
         this.isVIP = "VIP".equalsIgnoreCase(customerType);
         this.orderDate = OffsetDateTime.now();
-    }
-
-    public Order(List<FoodItem> items, String customerType, String paymentDetails, String deliveryAddress)
-    {
-        this(items, customerType);
-        this.paymentDetails = paymentDetails;
-        this.deliveryAddress = deliveryAddress;
+        this.completed = false;
     }
 
     public UUID getOrderId() { return orderId; }
     public String getCustomerType() { return customerType; }
     public List<FoodItem> getItems() { return items; }
     public String getStatus() { return status; }
-    public void processRefund() { this.status = "Refunded"; }
+    public void processRefund() {
+        this.status = "Refunded";
+        this.completed = true;
+    }
     public boolean isVIP() { return isVIP; }
     public OffsetDateTime getOrderDate() { return orderDate; }
 
-    public void updateStatus(String newStatus) { this.status = newStatus; }
+    public void updateStatus(String newStatus)
+    {
+        this.status = newStatus;
+        if ("Completed".equalsIgnoreCase(newStatus)) {
+            this.completed = true;
+        }
+    }
 
     public void setPaymentDetails(String paymentDetails)
     {
@@ -82,5 +86,9 @@ public class Order
             total += item.getPrice();
         }
         return total;
+    }
+
+    public boolean isCompleted() {
+        return completed;
     }
 }

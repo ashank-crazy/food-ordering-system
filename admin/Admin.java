@@ -12,7 +12,7 @@ import java.util.*;
 public class Admin extends User
 {
     private final MenuManager menuManager = MenuManager.getInstance();
-    private final OrderManager orderManager = new OrderManager();
+    private final OrderManager orderManager = OrderManager.getInstance();
 
     public Admin(String name, String email, String password, String type)
     {
@@ -65,44 +65,13 @@ public class Admin extends User
                     verified_admin.viewPendingOrders();
                     break;
                 case "2":
-                    try
-                    {
-                        System.out.println("Enter the order ID to update:");
-                        UUID orderId = UUID.fromString(scanner.nextLine());
-                        System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
-                        String newStatus = scanner.nextLine();
-                        orderManager.updateOrderStatus(orderId, newStatus);
-                    }
-                    catch (IllegalArgumentException e)
-                    {
-                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
-                    }
+                    verified_admin.updateOrderStatus(scanner);
                     break;
                 case "3":
-                    try
-                    {
-                        System.out.println("Enter the order ID to refund:");
-                        UUID refundOrderId = UUID.fromString(scanner.nextLine());
-                        orderManager.processRefund(refundOrderId);
-                    }
-                    catch (IllegalArgumentException e)
-                    {
-                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
-                    }
+                    verified_admin.processRefunds(scanner);
                     break;
                 case "4":
-                    try
-                    {
-                        System.out.println("Enter the order ID for the special request:");
-                        UUID specialRequestOrderId = UUID.fromString(scanner.nextLine());
-                        System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
-                        String request = scanner.nextLine();
-                        orderManager.handleSpecialRequest(specialRequestOrderId, request);
-                    }
-                    catch (IllegalArgumentException e)
-                    {
-                        System.out.println("Invalid order ID format. Please enter a valid UUID.");
-                    }
+                    verified_admin.handleSpecialRequests(scanner);
                     break;
                 case "5":
                     return;
@@ -174,22 +143,61 @@ public class Admin extends User
         System.out.println("WARNING !\nOrders containing the item will be denied.");
     }
 
-
     public void viewPendingOrders()
     {
-        orderManager.viewPendingOrders();
+        List<Order> pendingOrders = orderManager.getPendingOrders();
+        if (pendingOrders.isEmpty()) {
+            System.out.println("No pending orders at the moment.");
+        } else {
+            System.out.println("Pending Orders:");
+            for (Order order : pendingOrders) {
+                System.out.println(order);
+            }
+        }
     }
 
-    public void updateOrderStatus()
+    public void updateOrderStatus(Scanner scanner)
     {
-//        order.updateStatus(status);
-//        orderManager.processOrder(order);
+        System.out.println("Enter the order ID to update:");
+        UUID orderId;
+        try {
+            orderId = UUID.fromString(scanner.nextLine());
+            System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
+            String newStatus = scanner.nextLine();
+            orderManager.updateOrderStatus(orderId, newStatus);
+            System.out.println("Order status updated successfully.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+        } catch (NoSuchElementException e) {
+            System.out.println("No order found with the given ID.");
+        }
     }
 
-    public void processRefunds() {
+    public void processRefunds(Scanner scanner)
+    {
+        System.out.println("Enter the order ID to refund:");
+        UUID refundOrderId;
+        try {
+            refundOrderId = UUID.fromString(scanner.nextLine());
+            orderManager.processRefund(refundOrderId);
+            System.out.println("Refund processed successfully for order ID: " + refundOrderId);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+        }
     }
 
-    public void handleSpecialRequests() {
+    public void handleSpecialRequests(Scanner scanner) {
+        System.out.println("Enter the order ID for the special request:");
+        UUID specialRequestOrderId;
+        try {
+            specialRequestOrderId = UUID.fromString(scanner.nextLine());
+            System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
+            String request = scanner.nextLine();
+            orderManager.handleSpecialRequest(specialRequestOrderId, request);
+            System.out.println("Special request processed successfully for order ID: " + specialRequestOrderId);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+        }
     }
 
     public void generateSalesReport()
