@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Admin extends User
 {
-    private final MenuManager menuManager = new MenuManager();
+    private final MenuManager menuManager = MenuManager.getInstance();
     private final OrderManager orderManager = new OrderManager();
 
     public Admin(String name, String email, String password, String type)
@@ -119,8 +119,7 @@ public class Admin extends User
         System.out.println("Enter item name:");
         String name = scanner.nextLine();
 
-        if (menuManager.findItemByName(name) != null)
-        {
+        if (menuManager.findItemByName(name) != null) {
             System.out.println("Item already exists. Try updating it instead.");
             return;
         }
@@ -145,8 +144,8 @@ public class Admin extends User
         System.out.println("Enter item name to update:");
         String name = scanner.nextLine();
 
-        if (menuManager.findItemByName(name) == null)
-        {
+        FoodItem item = menuManager.findItemByName(name);
+        if (item == null) {
             System.out.println("Item not found on the menu. Try adding it first.");
             return;
         }
@@ -160,15 +159,13 @@ public class Admin extends User
         menuManager.updateItem(name, price, available);
     }
 
-
     public void removeItem()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter item name to remove:");
         String name = scanner.nextLine();
 
-        if (menuManager.findItemByName(name) == null)
-        {
+        if (menuManager.findItemByName(name) == null) {
             System.out.println("Item not found on the menu.");
             return;
         }
@@ -226,7 +223,7 @@ public class Admin extends User
         System.out.println("-                  Daily Sales Report                 -");
         System.out.println("-------------------------------------------------------");
         System.out.println("Date: " + today);
-        System.out.println("Total Sales: $" + String.format("%.2f", totalSales));
+        System.out.println("Total Sales: Rs " + String.format("%.2f", totalSales));
         System.out.println("Total Orders: " + orders.size());
         System.out.println("Most Popular Item: " + (mostPopularItem != null ? mostPopularItem : "N/A"));
         System.out.println("-------------------------------------------------------");

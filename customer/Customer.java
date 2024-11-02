@@ -3,13 +3,17 @@ package customer;
 import models.Order;
 import models.FoodItem;
 import models.User;
+import utils.MenuManager;
 
 import java.util.*;
 
 public class Customer extends User {
     protected List<FoodItem> cart = new ArrayList<>();
-    private final List<FoodItem> menuItems = new ArrayList<>();
     protected Map<FoodItem, Integer> cartMap = new HashMap<>();
+    protected List<Order> orderHistory = new ArrayList<>();
+    protected Order currentOrder;
+    private final Map<FoodItem, List<String>> reviews = new HashMap<>();
+    private final MenuManager menuManager = MenuManager.getInstance();
 
     public Customer(String name, String email, String password, String type) {
         super(name, email, password, type);
@@ -143,17 +147,15 @@ public class Customer extends User {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item name to add to the cart:");
         String itemName = scanner.nextLine();
-        FoodItem item = findMenuItemByName(itemName);
+        FoodItem item = menuManager.findItemByName(itemName);
 
-        if (item == null)
-        {
+        if (item == null) {
             System.out.println("Item not found.");
             return;
         }
 
         System.out.println("Enter quantity:");
         int quantity = scanner.nextInt();
-
         cartMap.merge(item, quantity, Integer::sum);
         System.out.println("Added " + quantity + " of " + item.getName() + " to the cart.");
     }
@@ -163,10 +165,9 @@ public class Customer extends User {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item name to remove from the cart:");
         String itemName = scanner.nextLine();
-        FoodItem item = findMenuItemByName(itemName);
+        FoodItem item = menuManager.findItemByName(itemName);
 
-        if (item == null || !cartMap.containsKey(item))
-        {
+        if (item == null || !cartMap.containsKey(item)) {
             System.out.println("Item not in cart.");
             return;
         }
@@ -184,11 +185,12 @@ public class Customer extends User {
         System.out.println("Enter delivery address:");
         String deliveryAddress = scanner.nextLine();
 
-        Order newOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
-        newOrder.setPaymentDetails(paymentDetails);
-        newOrder.setDeliveryAddress(deliveryAddress);
+        currentOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
+        currentOrder.setPaymentDetails(paymentDetails);
+        currentOrder.setDeliveryAddress(deliveryAddress);
 
-        System.out.println("Order placed: " + newOrder);
+        System.out.println("Order placed: " + currentOrder);
+        orderHistory.add(currentOrder);
         cartMap.clear();
     }
 
@@ -257,13 +259,15 @@ public class Customer extends User {
         System.out.println("-------------------------------------------------------");
     }
 
-    private void viewAllItems() {
-        if (menuItems.isEmpty()) {
+    public void viewAllItems()
+    {
+        List<FoodItem> items = menuManager.getMenu();
+        if (items.isEmpty()) {
             System.out.println("The menu is currently empty.");
             return;
         }
         System.out.println("Complete Menu:");
-        for (FoodItem item : menuItems) {
+        for (FoodItem item : items) {
             System.out.println(item.getName() + " - " + item.getPrice() + " Rs - " + (item.isAvailable() ? "Available" : "Unavailable"));
         }
     }
@@ -273,10 +277,9 @@ public class Customer extends User {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item name to update the quantity:");
         String itemName = scanner.nextLine();
-        FoodItem item = findMenuItemByName(itemName);
+        FoodItem item = menuManager.findItemByName(itemName);
 
-        if (item == null || !cartMap.containsKey(item))
-        {
+        if (item == null || !cartMap.containsKey(item)) {
             System.out.println("Item not in cart.");
             return;
         }
@@ -284,13 +287,10 @@ public class Customer extends User {
         System.out.println("Enter new quantity:");
         int quantity = scanner.nextInt();
 
-        if (quantity > 0)
-        {
+        if (quantity > 0) {
             cartMap.put(item, quantity);
             System.out.println("Updated quantity of " + item.getName() + " to " + quantity + ".");
-        }
-        else
-        {
+        } else {
             cartMap.remove(item);
             System.out.println(item.getName() + " removed from the cart.");
         }
@@ -301,7 +301,7 @@ public class Customer extends User {
         System.out.println("Enter item name or keyword:");
         String keyword = scanner.nextLine().toLowerCase();
 
-        List<FoodItem> results = menuItems.stream()
+        List<FoodItem> results = menuManager.getMenu().stream()
                 .filter(item -> item.getName().toLowerCase().contains(keyword))
                 .toList();
 
@@ -313,17 +313,19 @@ public class Customer extends User {
         }
     }
 
-    public void sortByPrice() {
+    public void sortByPrice()
+    {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Sort by price:\n1. Ascending\n2. Descending");
         String sortOrder = scanner.nextLine();
 
-        List<FoodItem> sortedItems = new ArrayList<>(menuItems);
-        if (sortOrder.equals("1")) {
+        List<FoodItem> sortedItems = new ArrayList<>(menuManager.getMenu());
+        if (sortOrder.equals("1"))
             sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice));
-        } else if (sortOrder.equals("2")) {
+        else if (sortOrder.equals("2"))
             sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice).reversed());
-        } else {
+        else
+        {
             System.out.println("Invalid option. Defaulting to ascending order.");
             sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice));
         }
@@ -332,12 +334,13 @@ public class Customer extends User {
         sortedItems.forEach(item -> System.out.println(item.getName() + " - " + item.getPrice() + " Rs"));
     }
 
-    public void filterByCategory() {
+    public void filterByCategory()
+    {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter category:");
         String category = scanner.nextLine().toLowerCase();
 
-        List<FoodItem> filteredItems = menuItems.stream()
+        List<FoodItem> filteredItems = menuManager.getMenu().stream()
                 .filter(item -> item.getCategory().toLowerCase().equals(category))
                 .toList();
 
@@ -360,25 +363,98 @@ public class Customer extends User {
 
     private FoodItem findMenuItemByName(String name)
     {
-        return menuItems.stream()
-                .filter(item -> item.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
+        return menuManager.findItemByName(name);
     }
 
-    public void viewOrderStatus() {
+    public void viewOrderStatus()
+    {
+        if (currentOrder == null) {
+            System.out.println("No active orders to display status for.");
+            return;
+        }
+        System.out.println("Current order status: " + currentOrder.getStatus());
     }
 
-    public void cancelOrder() {
+    public void cancelOrder()
+    {
+        if (currentOrder == null) {
+            System.out.println("No active orders to cancel.");
+            return;
+        }
+
+        if (currentOrder.getStatus().equals("Preparing") || currentOrder.getStatus().equals("Out for Delivery")) {
+            System.out.println("Order cannot be canceled as it is already being prepared or out for delivery.");
+            return;
+        }
+
+        currentOrder.updateStatus("Canceled");
+        System.out.println("Your order has been successfully canceled.");
+        currentOrder = null;
     }
 
-    public void viewOrderHistory() {
+    public void viewOrderHistory()
+    {
+        if (orderHistory.isEmpty()) {
+            System.out.println("No past orders to display.");
+            return;
+        }
+
+        System.out.println("Order History:");
+        for (int i = 0; i < orderHistory.size(); i++) {
+            Order order = orderHistory.get(i);
+            System.out.println((i + 1) + ". " + order);
+        }
+
+        System.out.println("Would you like to reorder any past item? Enter the number or '0' to go back:");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+
+        if (choice > 0 && choice <= orderHistory.size())
+            reorder(orderHistory.get(choice - 1));
+        else
+            System.out.println("Returning to previous menu.");
     }
 
-    public void provideReview() {
+    private void reorder(Order pastOrder)
+    {
+        currentOrder = new Order(pastOrder.getItems(), (pastOrder.isVIP() ? "VIP" : "Regular"));
+        System.out.println("Reordered items: " + currentOrder);
     }
 
-    public void viewReviews() {
+    public void provideReview()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the item name to review:");
+        String itemName = scanner.nextLine();
+        FoodItem item = menuManager.findItemByName(itemName);
+
+        if (item == null) {
+            System.out.println("Item not found.");
+            return;
+        }
+
+        System.out.println("Enter your review:");
+        String review = scanner.nextLine();
+        reviews.computeIfAbsent(item, k -> new ArrayList<>()).add(review);
+        System.out.println("Review added for " + item.getName() + ".");
+    }
+
+    public void viewReviews()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the item name to view reviews:");
+        String itemName = scanner.nextLine();
+        FoodItem item = menuManager.findItemByName(itemName);
+
+        if (item == null || !reviews.containsKey(item)) {
+            System.out.println("No reviews found for this item.");
+            return;
+        }
+
+        System.out.println("Reviews for " + item.getName() + ":");
+        for (String review : reviews.get(item)) {
+            System.out.println("- " + review);
+        }
     }
 
     public void upgradeToVIP(Customer verified_customer)
