@@ -77,11 +77,14 @@ public class OrderManager
         System.out.println("Order not found with ID: " + orderId);
     }
 
-    public ArrayList<Order> getOrdersForDate(LocalDate today) {
+    public ArrayList<Order> getOrdersForDate(LocalDate today)
+    {
         ArrayList<Order> ordersForDate = new ArrayList<>();
 
-        for (Order order : orderQueue) {
-            if (order.getOrderDate().isEqual(OffsetDateTime.from(today))) {
+        for (Order order : orderQueue)
+        {
+            if (order.getOrderDate().toLocalDate().isEqual(today))
+            {
                 ordersForDate.add(order);
             }
         }

@@ -3,12 +3,13 @@ package customer;
 import models.Order;
 import models.FoodItem;
 import models.User;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+
+import java.util.*;
 
 public class Customer extends User {
     protected List<FoodItem> cart = new ArrayList<>();
+    private final List<FoodItem> menuItems = new ArrayList<>();
+    protected Map<FoodItem, Integer> cartMap = new HashMap<>();
 
     public Customer(String name, String email, String password, String type) {
         super(name, email, password, type);
@@ -139,20 +140,56 @@ public class Customer extends User {
 
     public void addToCart()
     {
-//        cart.add(item);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the item name to add to the cart:");
+        String itemName = scanner.nextLine();
+        FoodItem item = findMenuItemByName(itemName);
+
+        if (item == null)
+        {
+            System.out.println("Item not found.");
+            return;
+        }
+
+        System.out.println("Enter quantity:");
+        int quantity = scanner.nextInt();
+
+        cartMap.merge(item, quantity, Integer::sum);
+        System.out.println("Added " + quantity + " of " + item.getName() + " to the cart.");
     }
 
     public void removeFromCart()
     {
-//        cart.remove(item);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the item name to remove from the cart:");
+        String itemName = scanner.nextLine();
+        FoodItem item = findMenuItemByName(itemName);
+
+        if (item == null || !cartMap.containsKey(item))
+        {
+            System.out.println("Item not in cart.");
+            return;
+        }
+
+        cartMap.remove(item);
+        System.out.println(item.getName() + " has been removed from the cart.");
     }
 
-    public Order checkout()
+    public void checkout()
     {
-        Order newOrder = new Order(cart, "Regular");
-        System.out.println("Regular order placed: " + newOrder);
-        cart.clear();
-        return newOrder;
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter payment details:");
+        String paymentDetails = scanner.nextLine();
+
+        System.out.println("Enter delivery address:");
+        String deliveryAddress = scanner.nextLine();
+
+        Order newOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
+        newOrder.setPaymentDetails(paymentDetails);
+        newOrder.setDeliveryAddress(deliveryAddress);
+
+        System.out.println("Order placed: " + newOrder);
+        cartMap.clear();
     }
 
     @Override
@@ -221,21 +258,112 @@ public class Customer extends User {
     }
 
     private void viewAllItems() {
+        if (menuItems.isEmpty()) {
+            System.out.println("The menu is currently empty.");
+            return;
+        }
+        System.out.println("Complete Menu:");
+        for (FoodItem item : menuItems) {
+            System.out.println(item.getName() + " - " + item.getPrice() + " Rs - " + (item.isAvailable() ? "Available" : "Unavailable"));
+        }
     }
 
-    public void updateFoodItem() {
+    public void updateFoodItem()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the item name to update the quantity:");
+        String itemName = scanner.nextLine();
+        FoodItem item = findMenuItemByName(itemName);
+
+        if (item == null || !cartMap.containsKey(item))
+        {
+            System.out.println("Item not in cart.");
+            return;
+        }
+
+        System.out.println("Enter new quantity:");
+        int quantity = scanner.nextInt();
+
+        if (quantity > 0)
+        {
+            cartMap.put(item, quantity);
+            System.out.println("Updated quantity of " + item.getName() + " to " + quantity + ".");
+        }
+        else
+        {
+            cartMap.remove(item);
+            System.out.println(item.getName() + " removed from the cart.");
+        }
     }
 
     public void search() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter item name or keyword:");
+        String keyword = scanner.nextLine().toLowerCase();
+
+        List<FoodItem> results = menuItems.stream()
+                .filter(item -> item.getName().toLowerCase().contains(keyword))
+                .toList();
+
+        if (results.isEmpty()) {
+            System.out.println("No items found matching your search.");
+        } else {
+            System.out.println("Search Results:");
+            results.forEach(item -> System.out.println(item.getName() + " - " + item.getPrice() + " Rs"));
+        }
     }
 
     public void sortByPrice() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Sort by price:\n1. Ascending\n2. Descending");
+        String sortOrder = scanner.nextLine();
+
+        List<FoodItem> sortedItems = new ArrayList<>(menuItems);
+        if (sortOrder.equals("1")) {
+            sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice));
+        } else if (sortOrder.equals("2")) {
+            sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice).reversed());
+        } else {
+            System.out.println("Invalid option. Defaulting to ascending order.");
+            sortedItems.sort(Comparator.comparingDouble(FoodItem::getPrice));
+        }
+
+        System.out.println("Sorted Menu:");
+        sortedItems.forEach(item -> System.out.println(item.getName() + " - " + item.getPrice() + " Rs"));
     }
 
     public void filterByCategory() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter category:");
+        String category = scanner.nextLine().toLowerCase();
+
+        List<FoodItem> filteredItems = menuItems.stream()
+                .filter(item -> item.getCategory().toLowerCase().equals(category))
+                .toList();
+
+        if (filteredItems.isEmpty()) {
+            System.out.println("No items found in this category.");
+        } else {
+            System.out.println("Items in category '" + category + "':");
+            filteredItems.forEach(item -> System.out.println(item.getName() + " - " + item.getPrice() + " Rs"));
+        }
     }
 
-    public void viewTotal() {
+    public void viewTotal()
+    {
+        double total = cartMap.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().getPrice() * entry.getValue())
+                .sum();
+
+        System.out.println("Total price of items in cart: " + total + " Rs");
+    }
+
+    private FoodItem findMenuItemByName(String name)
+    {
+        return menuItems.stream()
+                .filter(item -> item.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     }
 
     public void viewOrderStatus() {

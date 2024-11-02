@@ -10,11 +10,10 @@ public class VIPCustomer extends Customer
     }
 
     @Override
-    public Order checkout()
+    public void checkout()
     {
         Order vipOrder = new Order(cart, "VIP");
         System.out.println("VIP order placed: " + vipOrder);
         cart.clear();
-        return vipOrder;
     }
 }

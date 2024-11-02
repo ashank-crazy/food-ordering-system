@@ -12,7 +12,9 @@ public class Order
     private String status;
     private String specialRequest;
     private final boolean isVIP;
-    private OffsetDateTime orderDate;
+    private final OffsetDateTime orderDate;
+    private String paymentDetails;
+    private String deliveryAddress;
 
     public Order(List<FoodItem> items, String customerType)
     {
@@ -21,7 +23,14 @@ public class Order
         this.items = items;
         this.status = "Pending";
         this.isVIP = "VIP".equalsIgnoreCase(customerType);
-        OffsetDateTime orderDate = OffsetDateTime.now();
+        this.orderDate = OffsetDateTime.now();
+    }
+
+    public Order(List<FoodItem> items, String customerType, String paymentDetails, String deliveryAddress)
+    {
+        this(items, customerType);
+        this.paymentDetails = paymentDetails;
+        this.deliveryAddress = deliveryAddress;
     }
 
     public UUID getOrderId() { return orderId; }
@@ -30,8 +39,29 @@ public class Order
     public String getStatus() { return status; }
     public void processRefund() { this.status = "Refunded"; }
     public boolean isVIP() { return isVIP; }
+    public OffsetDateTime getOrderDate() { return orderDate; }
 
     public void updateStatus(String newStatus) { this.status = newStatus; }
+
+    public void setPaymentDetails(String paymentDetails)
+    {
+        this.paymentDetails = paymentDetails;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress)
+    {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getPaymentDetails()
+    {
+        return paymentDetails;
+    }
+
+    public String getDeliveryAddress()
+    {
+        return deliveryAddress;
+    }
 
     @Override
     public String toString()
@@ -52,9 +82,5 @@ public class Order
             total += item.getPrice();
         }
         return total;
-    }
-
-    public OffsetDateTime getOrderDate() {
-        return orderDate;
     }
 }
