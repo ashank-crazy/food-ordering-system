@@ -13,10 +13,9 @@ public class Customer extends User {
     protected Map<FoodItem, Integer> cartMap = new HashMap<>();
     protected List<Order> orderHistory = new ArrayList<>();
     protected Order currentOrder;
-    private final Map<FoodItem, List<String>> reviews = new HashMap<>();
     private final MenuManager menuManager = MenuManager.getInstance();
     private final OrderManager orderManager = OrderManager.getInstance();
-
+    private static final Map<FoodItem, String> itemReviews = new HashMap<>();
 
     public Customer(String name, String email, String password, String type) {
         super(name, email, password, type);
@@ -152,14 +151,23 @@ public class Customer extends User {
         String itemName = scanner.nextLine();
         FoodItem item = menuManager.findItemByName(itemName);
 
-        if (item == null) {
+        if (item == null)
+        {
             System.out.println("Item not found.");
             return;
         }
 
+        if(!item.isAvailable())
+        {
+            System.out.println("Item is currently unavailable.");
+            return;
+        }
+
+        System.out.println("Item found: " + item.getName() + " - " + item.getPrice() + " Rs");
         System.out.println("Enter quantity:");
         int quantity = scanner.nextInt();
         cartMap.merge(item, quantity, Integer::sum);
+        System.out.println("The cost of " + quantity + " " + item.getName() + " would be " + (item.getPrice() * quantity) + " Rs");
         System.out.println("Added " + quantity + " of " + item.getName() + " to the cart.");
     }
 
@@ -179,20 +187,45 @@ public class Customer extends User {
         System.out.println(item.getName() + " has been removed from the cart.");
     }
 
-    public void checkout()
-    {
+    public void checkout() {
+        if (cartMap.isEmpty()) {
+            System.out.println("Cart is empty.\n");
+            return;
+        }
+
+        double temp = 0;
+        System.out.println("Items in cart:");
+        for (Map.Entry<FoodItem, Integer> entry : cartMap.entrySet()) {
+            FoodItem item = entry.getKey();
+            int quantity = entry.getValue();
+            System.out.println(item.getName() + " - Quantity: " + quantity + " - Cost: " + (item.getPrice() * quantity) + " Rs");
+            temp += item.getPrice() * quantity;
+        }
+
+        System.out.println("Do you have any Special Requests ? (yes/no)");
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter payment details:");
+        String response = scanner.nextLine();
+
+        if (response.equalsIgnoreCase("yes")) {
+            System.out.println("Enter your special request:");
+            String request = scanner.nextLine();
+            currentOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
+            orderManager.setSpecialRequests(currentOrder.getOrderId(), request);
+        } else {
+            currentOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
+        }
+
+        System.out.println("\nEnter payment details:");
         String paymentDetails = scanner.nextLine();
 
         System.out.println("Enter delivery address:");
         String deliveryAddress = scanner.nextLine();
 
         currentOrder = new Order(new ArrayList<>(cartMap.keySet()), "Regular");
+        currentOrder.updateTotalForDay(temp);
         currentOrder.setPaymentDetails(paymentDetails);
         currentOrder.setDeliveryAddress(deliveryAddress);
         currentOrder.updateStatus("Order Placed");
-
         orderManager.addOrder(currentOrder);
         System.out.println("Regular order placed: " + currentOrder);
         orderHistory.add(currentOrder);
@@ -289,6 +322,7 @@ public class Customer extends User {
             return;
         }
 
+        System.out.println("Item found: " + item.getName() + " - " + item.getPrice() + " Rs" + cartMap.get(item) + " quantity\n");
         System.out.println("Enter new quantity:");
         int quantity = scanner.nextInt();
 
@@ -412,7 +446,7 @@ public class Customer extends User {
 
         System.out.println("Enter your review:");
         String review = scanner.nextLine();
-        reviews.computeIfAbsent(item, k -> new ArrayList<>()).add(review);
+        itemReviews.put(item, review);
         System.out.println("Review added for " + item.getName() + ".");
     }
 
@@ -423,15 +457,13 @@ public class Customer extends User {
         String itemName = scanner.nextLine();
         FoodItem item = menuManager.findItemByName(itemName);
 
-        if (item == null || !reviews.containsKey(item)) {
+        if (item == null || !itemReviews.containsKey(item)) {
             System.out.println("No reviews found for this item.");
             return;
         }
 
-        System.out.println("Reviews for " + item.getName() + ":");
-        for (String review : reviews.get(item)) {
-            System.out.println("- " + review);
-        }
+        System.out.println("Review for " + item.getName() + ":");
+        System.out.println("- " + itemReviews.get(item));
     }
 
     public VIPCustomer upgradeToVIP(Customer verified_customer)
@@ -452,5 +484,13 @@ public class Customer extends User {
         System.out.println("Your orders will now be prioritized.");
 
         return vipCustomer;
+    }
+
+    public static Map<FoodItem, String> getItemReviews() {
+        return itemReviews;
+    }
+
+    public static void setItemReviews(FoodItem item, String review) {
+        itemReviews.put(item, review);
     }
 }

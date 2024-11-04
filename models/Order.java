@@ -1,12 +1,17 @@
 package models;
 
+import utils.OrderManager;
+
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class Order
 {
-    private final UUID orderId;
+    private final OrderManager orderManager = OrderManager.getInstance();
+    private static int idCounter = 1;
+    private final int orderId;
     private final String customerType;
     private final List<FoodItem> items;
     private String status;
@@ -16,10 +21,11 @@ public class Order
     private String paymentDetails;
     private String deliveryAddress;
     private boolean completed;
+    public static HashMap<LocalDate, Double> totalForDay = new HashMap<>();
 
     public Order(List<FoodItem> items, String customerType)
     {
-        this.orderId = UUID.randomUUID();
+        orderId = idCounter++;
         this.customerType = customerType;
         this.items = items;
         this.status = "Pending";
@@ -28,7 +34,7 @@ public class Order
         this.completed = false;
     }
 
-    public UUID getOrderId() { return orderId; }
+    public int getOrderId() { return orderId; }
     public String getCustomerType() { return customerType; }
     public List<FoodItem> getItems() { return items; }
     public String getStatus() { return status; }
@@ -79,13 +85,16 @@ public class Order
                 '}';
     }
 
-    public double getTotalPrice() {
-        double total = 0.0;
-        for (FoodItem item : items)
-        {
-            total += item.getPrice();
-        }
-        return total;
+    public void updateTotalForDay(double temp)
+    {
+        LocalDate today = LocalDate.now();
+        totalForDay.put(today, totalForDay.getOrDefault(today, 0.0) + temp);
+
+    }
+
+    public static double getTotalForToday(LocalDate date)
+    {
+        return totalForDay.getOrDefault(date, 0.0);
     }
 
     public boolean isCompleted() {

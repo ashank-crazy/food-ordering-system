@@ -159,15 +159,15 @@ public class Admin extends User
     public void updateOrderStatus(Scanner scanner)
     {
         System.out.println("Enter the order ID to update:");
-        UUID orderId;
+        int orderId;
         try {
-            orderId = UUID.fromString(scanner.nextLine());
+            orderId = Integer.parseInt(scanner.nextLine());
             System.out.println("Enter new status (e.g., 'Preparing', 'Out for Delivery', 'Completed'):");
             String newStatus = scanner.nextLine();
             orderManager.updateOrderStatus(orderId, newStatus);
             System.out.println("Order status updated successfully.");
         } catch (IllegalArgumentException e) {
-            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+            System.out.println("Invalid order ID format. Please enter a valid order ID.");
         } catch (NoSuchElementException e) {
             System.out.println("No order found with the given ID.");
         }
@@ -176,27 +176,25 @@ public class Admin extends User
     public void processRefunds(Scanner scanner)
     {
         System.out.println("Enter the order ID to refund:");
-        UUID refundOrderId;
+        int refundOrderId;
         try {
-            refundOrderId = UUID.fromString(scanner.nextLine());
+            refundOrderId = Integer.parseInt(scanner.nextLine());
             orderManager.processRefund(refundOrderId);
             System.out.println("Refund processed successfully for order ID: " + refundOrderId);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid order ID format. Please enter a valid integer order ID.");
         }
     }
 
     public void handleSpecialRequests(Scanner scanner) {
-        System.out.println("Enter the order ID for the special request:");
-        UUID specialRequestOrderId;
+        System.out.println("Enter the order ID to view special requests:");
+        int specialRequestOrderId;
+
         try {
-            specialRequestOrderId = UUID.fromString(scanner.nextLine());
-            System.out.println("Enter the special request (e.g., 'extra spicy', 'no onions'):");
-            String request = scanner.nextLine();
-            orderManager.handleSpecialRequest(specialRequestOrderId, request);
-            System.out.println("Special request processed successfully for order ID: " + specialRequestOrderId);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid order ID format. Please enter a valid UUID.");
+            specialRequestOrderId = Integer.parseInt(scanner.nextLine());
+            orderManager.getSpecialRequests(specialRequestOrderId);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid order ID format. Please enter a valid integer order ID.");
         }
     }
 
@@ -204,12 +202,11 @@ public class Admin extends User
     {
         LocalDate today = LocalDate.now();
         List<Order> orders = orderManager.getOrdersForDate(today);
-        double totalSales = 0.0;
+        double totalSales = Order.getTotalForToday(today);
         Map<String, Integer> itemCountMap = new HashMap<>();
 
         for (Order order : orders)
         {
-            totalSales += order.getTotalPrice();
             for (FoodItem item : order.getItems())
             {
                 itemCountMap.put(item.getName(), itemCountMap.getOrDefault(item.getName(), 0) + 1);
@@ -236,7 +233,6 @@ public class Admin extends User
         System.out.println("Most Popular Item: " + (mostPopularItem != null ? mostPopularItem : "N/A"));
         System.out.println("-------------------------------------------------------");
     }
-
 
     @Override
     public void showMenu() {

@@ -9,6 +9,7 @@ public class OrderManager
 {
     private static OrderManager instance;
     private final Queue<Order> orderQueue;
+    private static Map<Integer, String> specialRequests = new HashMap<>();
 
     public OrderManager()
     {
@@ -39,11 +40,11 @@ public class OrderManager
             System.out.println(order);
     }
 
-    public void updateOrderStatus(UUID orderId, String newStatus)
+    public void updateOrderStatus(int orderId, String newStatus)
     {
         for (Order order : new ArrayList<>(orderQueue))
         {
-            if (order.getOrderId().equals(orderId))
+            if (order.getOrderId() == orderId)
             {
                 order.updateStatus(newStatus);
                 System.out.println("Order status updated: " + order);
@@ -53,11 +54,11 @@ public class OrderManager
         System.out.println("Order not found with ID: " + orderId);
     }
 
-    public void processRefund(UUID orderId)
+    public void processRefund(int orderId)
     {
         for (Order order : new ArrayList<>(orderQueue))
         {
-            if (order.getOrderId().equals(orderId))
+            if (order.getOrderId() == orderId)
             {
                 order.processRefund();
                 orderQueue.remove(order);
@@ -67,18 +68,19 @@ public class OrderManager
         System.out.println("Order not found with ID: " + orderId);
     }
 
-    public void handleSpecialRequest(UUID orderId, String request)
+    public void getSpecialRequests(int orderId)
     {
-        for (Order order : new ArrayList<>(orderQueue))
-        {
-            if (order.getOrderId().equals(orderId))
-            {
-                order.updateStatus("Special request: " + request);
-                System.out.println("Special request updated for order ID: " + orderId);
-                return;
-            }
+        if (specialRequests.containsKey(orderId)) {
+            System.out.println("Special Request: " + specialRequests.get(orderId));
+        } else {
+            System.out.println("No special requests found for this order.");
         }
-        System.out.println("Order not found with ID: " + orderId);
+    }
+
+    public void setSpecialRequests(int orderId, String request)
+    {
+        specialRequests.put(orderId, request);
+        System.out.println("Special request added for order ID: " + orderId);
     }
 
     public ArrayList<Order> getOrdersForDate(LocalDate today)
@@ -111,7 +113,7 @@ public class OrderManager
         while (iterator.hasNext())
         {
             Order order = iterator.next();
-            if (order.getOrderId().equals(currentOrder.getOrderId()))
+            if (order.getOrderId() == currentOrder.getOrderId())
             {
                 order.updateStatus("Cancelled");
                 iterator.remove();
