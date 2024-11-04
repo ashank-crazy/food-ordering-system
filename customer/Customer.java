@@ -415,6 +415,13 @@ public class Customer extends User {
             System.out.println("No current order to cancel.");
             return;
         }
+
+        if(orderManager.getOrderStatus(currentOrder.getOrderId()).equalsIgnoreCase("prepared") || orderManager.getOrderStatus(currentOrder.getOrderId()).equalsIgnoreCase("processed"))
+        {
+            System.out.println("Order cannot be canceled as it is already " + orderManager.getOrderStatus(currentOrder.getOrderId()));
+            return;
+        }
+
         orderManager.cancelOrder(currentOrder);
         currentOrder = null;
         System.out.println("Order has been canceled.");
@@ -430,6 +437,44 @@ public class Customer extends User {
         for (Order order : orderHistory) {
             System.out.println(order);
         }
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Do you want to reorder any item? (yes/no)");
+        String response = scanner.nextLine();
+
+        if (response.equalsIgnoreCase("yes")) {
+            reorder();
+        }
+    }
+
+    public void reorder()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the order ID to reorder:");
+        int orderId = scanner.nextInt();
+        scanner.nextLine();
+
+        Order orderToReorder = null;
+        for (Order order : orderHistory) {
+            if (order.getOrderId() == orderId) {
+                orderToReorder = order;
+                break;
+            }
+        }
+
+        if (orderToReorder == null) {
+            System.out.println("Order not found in history.");
+            return;
+        }
+
+        currentOrder = new Order(orderToReorder.getItems(), "Regular");
+//        currentOrder.updateTotalForDay(orderToReorder.getTotalForDay());
+        currentOrder.setPaymentDetails(orderToReorder.getPaymentDetails());
+        currentOrder.setDeliveryAddress(orderToReorder.getDeliveryAddress());
+        currentOrder.updateStatus("Order Placed");
+        orderManager.addOrder(currentOrder);
+        System.out.println("Reorder placed: " + currentOrder);
+        orderHistory.add(currentOrder);
     }
 
     public void provideReview()

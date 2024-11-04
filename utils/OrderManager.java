@@ -33,6 +33,18 @@ public class OrderManager
         System.out.println("Order added: " + order);
     }
 
+    public String getOrderStatus(int orderId)
+    {
+        for (Order order : orderQueue)
+        {
+            if (order.getOrderId() == orderId)
+            {
+                return order.getStatus();
+            }
+        }
+        return "Order not found with ID: " + orderId;
+    }
+
     public void viewPendingOrders()
     {
         System.out.println("Pending Orders:");
