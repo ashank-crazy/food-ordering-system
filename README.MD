@@ -10,7 +10,7 @@ Justifications for using collections :
 
 3) HashMap 
 	- To store the total sales for each day.
-	- I used it because it because on an average retrieval, addition and removal of an item is O(1) or constant time operation.
+	- I used it because on an average retrieval, addition and removal of an item is O(1) or constant time operation.
 
 4) PriorityQueue 
 	- To store pending order.
