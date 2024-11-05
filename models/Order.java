@@ -100,4 +100,18 @@ public class Order
     public boolean isCompleted() {
         return completed;
     }
+
+    public int getOrderID()
+    {
+        return orderId;
+    }
+
+    public boolean containsItem(String name) {
+        for (FoodItem item : items) {
+            if (item.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

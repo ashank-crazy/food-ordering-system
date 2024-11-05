@@ -139,6 +139,15 @@ public class Admin extends User
             return;
         }
 
+        for (Order order : orderManager.getPendingOrders())
+        {
+            System.out.println(order);
+            if (order.containsItem(name))
+            {
+                orderManager.denyOrder(order.getOrderID());
+            }
+        }
+
         menuManager.removeItem(name);
         System.out.println("WARNING !\nOrders containing the item will be denied.");
     }

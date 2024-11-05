@@ -9,7 +9,7 @@ public class OrderManager
 {
     private static OrderManager instance;
     private final Queue<Order> orderQueue;
-    private static Map<Integer, String> specialRequests = new HashMap<>();
+    private static final Map<Integer, String> specialRequests = new HashMap<>();
 
     public OrderManager()
     {
@@ -93,6 +93,11 @@ public class OrderManager
     {
         specialRequests.put(orderId, request);
         System.out.println("Special request added for order ID: " + orderId);
+    }
+
+    public void denyOrder(int orderId)
+    {
+        updateOrderStatus(orderId, "Denied");
     }
 
     public ArrayList<Order> getOrdersForDate(LocalDate today)
