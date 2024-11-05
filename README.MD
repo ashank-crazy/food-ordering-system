@@ -19,6 +19,11 @@ Justifications for using collections :
 5) ArrayList 
 	- I used it because ArrayList allows dynamic resizing and is efficient for cases where elements are primarily accessed by index, which is ideal for managing ordered lists of items.
 
+Assumptions :
+	- Daily Sales Report is generated based on the current date, with each order date corresponding to the date the order was placed.
+	- Normal customer can become VIP customer by choosing upgradetoVIP option from customer interface.
+	- Customers can leave feedback for any food item present in the menu.
+
 
 Sources :
 
