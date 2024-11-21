@@ -36,12 +36,16 @@ public class MenuManager implements Serializable {
         menu.add(item);
         saveMenu();
 
+
+
         // for debugging, plss remove
         System.out.println("Item added successfully: " + item);
         System.out.println("Current Menu:");
         for (FoodItem menuItem : menu) {
             System.out.println(menuItem);
         }
+
+
 
         System.out.println("Item added successfully: " + item);
     }
@@ -78,9 +82,13 @@ public class MenuManager implements Serializable {
         menu.remove(item);
         saveMenu();
 
+
         // for debugging, plss remove
         System.out.println("Item removed successfully: " + item);
         System.out.println("Current Menu:");
+
+
+
         for (FoodItem menuItem : menu) {
             System.out.println(menuItem);
         }

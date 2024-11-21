@@ -572,7 +572,6 @@ public class Customer extends User implements Serializable {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.dat"))) {
             Object data = ois.readObject();
             if (data instanceof List) {
-//                @SuppressWarnings("unchecked")
                         customers = (List<Customer>) data;
             }
         } catch (IOException | ClassNotFoundException e) {

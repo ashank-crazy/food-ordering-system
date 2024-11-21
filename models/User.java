@@ -1,6 +1,5 @@
 package models;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public abstract class User implements Systeminterface, Serializable
@@ -17,13 +16,6 @@ public abstract class User implements Systeminterface, Serializable
         this.email = email;
         this.password = password;
         this.type = type;
-    }
-
-    public User() {
-        this.name = "";
-        this.email = "";
-        this.password = "";
-        this.type = "";
     }
 
     public String getEmail()

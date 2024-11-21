@@ -15,7 +15,7 @@ public class ByteMe {
     static final String CUSTOMERS_FILE = "customers.dat";
     static final String ADMINS_FILE = "admins.dat";
 
-    static HashMap<String, User> Users = new HashMap<>();
+    public static HashMap<String, User> Users = new HashMap<>();
     static ArrayList<Customer> Customers = new ArrayList<>();
     static ArrayList<Admin> Admins = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class ByteMe {
         }
     }
 
-    private static void signupmenu() {
+    public static void signupmenu() {
         Scanner scanner = new Scanner(System.in);
         String select = scanner.nextLine();
         String email = "";
@@ -239,7 +239,7 @@ public class ByteMe {
         }
     }
 
-    private static void loadData() {
+    public static void loadData() {
         try (ObjectInputStream userInput = new ObjectInputStream(new FileInputStream(USERS_FILE));
              ObjectInputStream customerInput = new ObjectInputStream(new FileInputStream(CUSTOMERS_FILE));
              ObjectInputStream adminInput = new ObjectInputStream(new FileInputStream(ADMINS_FILE))) {
@@ -255,7 +255,7 @@ public class ByteMe {
         }
     }
 
-    private static void saveData() {
+    public static void saveData() {
         try (ObjectOutputStream userOutput = new ObjectOutputStream(new FileOutputStream(USERS_FILE));
              ObjectOutputStream customerOutput = new ObjectOutputStream(new FileOutputStream(CUSTOMERS_FILE));
              ObjectOutputStream adminOutput = new ObjectOutputStream(new FileOutputStream(ADMINS_FILE))) {
