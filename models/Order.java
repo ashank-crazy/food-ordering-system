@@ -2,14 +2,17 @@ package models;
 
 import utils.OrderManager;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 
-public class Order
+public class Order implements Serializable
 {
-    private final OrderManager orderManager = OrderManager.getInstance();
+    private static final long serialVersionUID = 1L;
     private static int idCounter = 1;
     private final int orderId;
     private final String customerType;
@@ -113,5 +116,15 @@ public class Order
             }
         }
         return false;
+    }
+
+    private Object readResolve() {
+        OrderManager.getInstance();
+        return this;
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        OrderManager.getInstance();
     }
 }

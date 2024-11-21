@@ -2,27 +2,43 @@ package utils;
 
 import models.Order;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 
-public class OrderManager
+public class OrderManager implements Serializable
 {
-    private static OrderManager instance;
-    private final Queue<Order> orderQueue;
+    private static final long serialVersionUID = 1L;
+    private static transient volatile OrderManager instance;
+    private final PriorityQueue<Order> orderQueue;
     private static final Map<Integer, String> specialRequests = new HashMap<>();
 
-    public OrderManager()
-    {
-        orderQueue = new PriorityQueue<>((o1, o2) -> {
+    public static class OrderPriorityComparator implements Comparator<Order>, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public int compare(Order o1, Order o2) {
             if (o1.isVIP() && !o2.isVIP()) return -1;
             if (!o1.isVIP() && o2.isVIP()) return 1;
             return 0;
-        });
+        }
+    }
+
+    private OrderManager() {
+        orderQueue = new PriorityQueue<>(new OrderPriorityComparator());
+    }
+
+    private Object readResolve() {
+        return getInstance();
     }
 
     public static OrderManager getInstance() {
         if (instance == null) {
-            instance = new OrderManager();
+            synchronized (OrderManager.class) {
+                if (instance == null) {
+                    instance = new OrderManager();
+                }
+            }
         }
         return instance;
     }

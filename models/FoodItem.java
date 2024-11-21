@@ -1,7 +1,11 @@
 package models;
 
-public class FoodItem
+import java.io.Serializable;
+import java.util.Objects;
+
+public class FoodItem implements Serializable
 {
+    private static final long serialVersionUID = 1L;
     private final String name;
     private double price;
     private final String category;
@@ -34,4 +38,16 @@ public class FoodItem
                 '}';
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        FoodItem foodItem = (FoodItem) obj;
+        return name.equalsIgnoreCase(foodItem.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name.toLowerCase());
+    }
 }

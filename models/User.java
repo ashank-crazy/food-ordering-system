@@ -1,11 +1,15 @@
 package models;
 
-public abstract class User implements Systeminterface
+import java.io.Serial;
+import java.io.Serializable;
+
+public abstract class User implements Systeminterface, Serializable
 {
     private final String email;
     private final String password;
     private final String type;
     private final String name;
+    private static final long serialVersionUID = 1L;
 
     public User(String name, String email, String password, String type)
     {
@@ -13,6 +17,13 @@ public abstract class User implements Systeminterface
         this.email = email;
         this.password = password;
         this.type = type;
+    }
+
+    public User() {
+        this.name = "";
+        this.email = "";
+        this.password = "";
+        this.type = "";
     }
 
     public String getEmail()

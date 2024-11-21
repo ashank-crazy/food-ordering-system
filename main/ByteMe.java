@@ -5,17 +5,24 @@ import admin.Admin;
 import customer.*;
 import Exceptions.*;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class ByteMe {
+    static final String USERS_FILE = "users.dat";
+    static final String CUSTOMERS_FILE = "customers.dat";
+    static final String ADMINS_FILE = "admins.dat";
+
     static HashMap<String, User> Users = new HashMap<>();
     static ArrayList<Customer> Customers = new ArrayList<>();
     static ArrayList<Admin> Admins = new ArrayList<>();
 
     public static void main(String[] args)
     {
+        loadData();
+
         Scanner scanner = new Scanner(System.in);
 
         while(true)
@@ -34,6 +41,7 @@ public class ByteMe {
                     signupmenu();
                     break;
                 case "3":
+                    saveData();
                     System.out.println("Successfully exited");
                     return;
                 default:
@@ -222,11 +230,42 @@ public class ByteMe {
                     break;
                 case "6":
                     System.out.println("\nSuccessfully Logged Out ! ");
+                    verified_customer.saveCustomerData();
                     return;
                 default:
                     System.out.println("\nPlease choose a valid option");
                     break;
             }
+        }
+    }
+
+    private static void loadData() {
+        try (ObjectInputStream userInput = new ObjectInputStream(new FileInputStream(USERS_FILE));
+             ObjectInputStream customerInput = new ObjectInputStream(new FileInputStream(CUSTOMERS_FILE));
+             ObjectInputStream adminInput = new ObjectInputStream(new FileInputStream(ADMINS_FILE))) {
+
+            Users = (HashMap<String, User>) userInput.readObject();
+            Customers = (ArrayList<Customer>) customerInput.readObject();
+            Admins = (ArrayList<Admin>) adminInput.readObject();
+
+        } catch (FileNotFoundException e) {
+            System.out.println("No previous data found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading data: " + e.getMessage());
+        }
+    }
+
+    private static void saveData() {
+        try (ObjectOutputStream userOutput = new ObjectOutputStream(new FileOutputStream(USERS_FILE));
+             ObjectOutputStream customerOutput = new ObjectOutputStream(new FileOutputStream(CUSTOMERS_FILE));
+             ObjectOutputStream adminOutput = new ObjectOutputStream(new FileOutputStream(ADMINS_FILE))) {
+
+            userOutput.writeObject(Users);
+            customerOutput.writeObject(Customers);
+            adminOutput.writeObject(Admins);
+
+        } catch (IOException e) {
+            System.out.println("Error saving data: " + e.getMessage());
         }
     }
 

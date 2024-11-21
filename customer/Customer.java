@@ -6,19 +6,28 @@ import models.User;
 import utils.MenuManager;
 import utils.OrderManager;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Customer extends User {
+public class Customer extends User implements Serializable {
     protected Map<FoodItem, Integer> cartMap = new HashMap<>();
     protected List<Order> orderHistory = new ArrayList<>();
     protected Order currentOrder;
-    private final MenuManager menuManager = MenuManager.getInstance();
-    private final OrderManager orderManager = OrderManager.getInstance();
+    MenuManager menuManager = MenuManager.getInstance();
+    private transient OrderManager orderManager;
     private static final Map<FoodItem, String> itemReviews = new HashMap<>();
+    private static final long serialVersionUID = 1L;
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        orderManager = OrderManager.getInstance();
+    }
 
     public Customer(String name, String email, String password, String type) {
         super(name, email, password, type);
+        this.currentOrder = null;
+        loadCustomerData();
     }
 
     public void browseMenu(Customer verified_customer) {
@@ -310,8 +319,7 @@ public class Customer extends User {
         }
     }
 
-    public void updateFoodItem()
-    {
+    public void updateFoodItem() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item name to update the quantity:");
         String itemName = scanner.nextLine();
@@ -322,7 +330,7 @@ public class Customer extends User {
             return;
         }
 
-        System.out.println("Item found: " + item.getName() + " - " + item.getPrice() + " Rs" + cartMap.get(item) + " quantity\n");
+        System.out.println("Item found: \nItem : " + item.getName() + " | Price : " + item.getPrice() + " Rs | Quantity : " + cartMap.get(item) + "\n");
         System.out.println("Enter new quantity:");
         int quantity = scanner.nextInt();
 
@@ -529,6 +537,57 @@ public class Customer extends User {
         System.out.println("Your orders will now be prioritized.");
 
         return vipCustomer;
+    }
+
+    public void loadCustomerData() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.dat"))) {
+            Object data = ois.readObject();
+            if (data instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Customer> customers = (List<Customer>) data;
+                Optional<Customer> matchingCustomer = customers.stream()
+                        .filter(c -> c.getEmail().equals(this.getEmail()))
+                        .findFirst();
+
+                if (matchingCustomer.isPresent()) {
+                    Customer customer = matchingCustomer.get();
+                    this.cartMap = customer.cartMap;
+                    this.orderHistory = customer.orderHistory;
+                    this.currentOrder = customer.currentOrder;
+                    System.out.println("Customer data loaded successfully.");
+                } else {
+                    System.out.println("No matching customer found in customers.dat.");
+                }
+            } else {
+                System.out.println("Invalid data format in customers.dat.");
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Failed to load customer data or no data exists.");
+        }
+    }
+
+    public void saveCustomerData() {
+        List<Customer> customers = new ArrayList<>();
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.dat"))) {
+            Object data = ois.readObject();
+            if (data instanceof List) {
+//                @SuppressWarnings("unchecked")
+                        customers = (List<Customer>) data;
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("No previous data found. Starting fresh.");
+        }
+
+        customers.removeIf(c -> c.getEmail().equals(this.getEmail()));
+        customers.add(this);
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("customers.dat"))) {
+            oos.writeObject(customers);
+            System.out.println("Customer data saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Failed to save customer data.");
+        }
     }
 
     public static Map<FoodItem, String> getItemReviews() {

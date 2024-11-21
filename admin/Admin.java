@@ -6,12 +6,14 @@ import models.User;
 import utils.MenuManager;
 import utils.OrderManager;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 
-public class Admin extends User
+public class Admin extends User implements Serializable
 {
-    private final MenuManager menuManager = MenuManager.getInstance();
+    private static final long serialVersionUID = 1L;
+    MenuManager menuManager = MenuManager.getInstance();
     private final OrderManager orderManager = OrderManager.getInstance();
 
     public Admin(String name, String email, String password, String type)
@@ -105,6 +107,7 @@ public class Admin extends User
 
         FoodItem newItem = new FoodItem(name, price, category, available);
         menuManager.addItem(newItem);
+        menuManager.saveMenu();
     }
 
     public void updateFoodItem()
@@ -126,6 +129,7 @@ public class Admin extends User
         boolean available = scanner.nextBoolean();
 
         menuManager.updateItem(name, price, available);
+        menuManager.saveMenu();
     }
 
     public void removeItem()
@@ -150,6 +154,7 @@ public class Admin extends User
 
         menuManager.removeItem(name);
         System.out.println("WARNING !\nOrders containing the item will be denied.");
+        menuManager.saveMenu();
     }
 
     public void viewPendingOrders()
