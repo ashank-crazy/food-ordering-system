@@ -4,6 +4,7 @@ import models.User;
 import admin.Admin;
 import customer.*;
 import Exceptions.*;
+import utils.OrderManager;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,6 +23,11 @@ public class ByteMe {
     public static void main(String[] args)
     {
         loadData();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            saveData();
+            OrderManager.getInstance().saveOrders();
+        }));
 
         Scanner scanner = new Scanner(System.in);
 

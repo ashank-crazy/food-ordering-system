@@ -2,7 +2,7 @@ package utils;
 
 import models.Order;
 
-import java.io.Serializable;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -12,6 +12,8 @@ public class OrderManager implements Serializable
     private static transient volatile OrderManager instance;
     private final PriorityQueue<Order> orderQueue;
     private static final Map<Integer, String> specialRequests = new HashMap<>();
+    private static final String ORDERS_FILE = "orders.dat";
+
 
     public static class OrderPriorityComparator implements Comparator<Order>, Serializable {
         private static final long serialVersionUID = 1L;
@@ -26,6 +28,28 @@ public class OrderManager implements Serializable
 
     private OrderManager() {
         orderQueue = new PriorityQueue<>(new OrderPriorityComparator());
+        loadOrders();
+    }
+
+    public void saveOrders() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ORDERS_FILE))) {
+            oos.writeObject(orderQueue);
+        } catch (IOException e) {
+            System.out.println("Failed to save orders: " + e.getMessage());
+        }
+    }
+
+    public void loadOrders() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ORDERS_FILE))) {
+            PriorityQueue<Order> loadedOrders = (PriorityQueue<Order>) ois.readObject();
+            // to clear the existing queue
+            orderQueue.clear();
+            orderQueue.addAll(loadedOrders);
+        } catch (FileNotFoundException e) {
+            System.out.println("No previous orders found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Failed to load orders: " + e.getMessage());
+        }
     }
 
     private Object readResolve() {

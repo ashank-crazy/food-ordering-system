@@ -1,10 +1,7 @@
 package main;
 
-import main.PendingOrdersPanel;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ByteMeGUI {
     private JFrame frame;
@@ -35,12 +32,18 @@ public class ByteMeGUI {
         JPanel panel = new JPanel();
         JButton menuButton = new JButton("Menu");
         JButton pendingOrdersButton = new JButton("Pending Orders");
+        JButton refreshButton = new JButton("Refresh");
 
         menuButton.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
         pendingOrdersButton.addActionListener(e -> cardLayout.show(mainPanel, "PendingOrders"));
+        refreshButton.addActionListener(e -> {
+            menuPanel.refreshMenu();
+            pendingOrdersPanel.refreshOrders();
+        });
 
         panel.add(menuButton);
         panel.add(pendingOrdersButton);
+        panel.add(refreshButton);
 
         return panel;
     }

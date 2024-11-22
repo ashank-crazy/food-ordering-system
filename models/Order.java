@@ -119,12 +119,11 @@ public class Order implements Serializable
     }
 
     private Object readResolve() {
-        OrderManager.getInstance();
         return this;
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        OrderManager.getInstance();
+        //OrderManager.getInstance();
     }
 }
