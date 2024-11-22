@@ -124,78 +124,46 @@ public class ByteMe {
         }
     }
 
-   public static void authenticate_user(String role) throws InvalidLoginException {
-            Scanner sc = new Scanner(System.in);
-            int attempts = 5;
-            while (attempts > 0) {
-                System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
-                String email = sc.nextLine();
-                if (email.equals("back")) {
-                    return;
-                }
-                System.out.println("Enter your password: ");
-                String password = sc.nextLine();
-
-                User user = Users.get(email);
-                if (user != null && user.getPassword().equals(password)) {
-                    System.out.println("Login successful");
-                    return;
-                } else {
-                    attempts--;
-                    System.out.println("Incorrect Password, Try Again");
-                    System.out.println("Attempts remaining: " + attempts);
-                }
-            }
-            System.out.println("Too many failed attempts to login.");
-            throw new InvalidLoginException("Too many failed attempts to login.");
-    }
-
-    /*
     public static void authenticate_user(String userType) throws InvalidLoginException
     {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            int attempts = 5;
+        Scanner scanner = new Scanner(System.in);
+        int attempts = 5;
 
-            while (attempts > 0) {
-                System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
-                String email = scanner.nextLine();
-
-                if (email.equalsIgnoreCase("back"))
-                    return;
-
-                System.out.println("Enter your password: ");
-                String password = scanner.nextLine();
-
-                if (Users.containsKey(email)) {
-                    User user = Users.get(email);
-
-                    if (user.authenticate(password, userType)) {
-                        System.out.println("Login Successful");
-
-                        if (user instanceof Customer verified_customer)
-                            handleCustomerMenu(verified_customer);
-                        else if (user instanceof Admin verified_admin)
-                            handleAdminMenu(verified_admin);
-                        return;
-                    } else
-                        System.out.println("Incorrect Password, Try Again");
-                } else
-                    System.out.println("Incorrect Email, Try again");
-
-                attempts--;
-                System.out.println("Attempts remaining: " + attempts);
-            }
-
-            throw new InvalidLoginException("\nToo many failed attempts to login.");
-        }
-        catch (Exception e)
+        while (attempts > 0)
         {
-            System.out.println("Error 103 : user authentication " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
+            String email = scanner.nextLine();
+
+            if (email.equalsIgnoreCase("back"))
+                return;
+
+            System.out.println("Enter your password: ");
+            String password = scanner.nextLine();
+
+            //User user = Users.get(email);
+            if (Users.containsKey(email)) {
+                User user = Users.get(email);
+
+                if (user.authenticate(password, userType)) {
+                    System.out.println("Login Successful");
+
+                    if (user instanceof Customer verified_customer)
+                        handleCustomerMenu(verified_customer);
+                    else if (user instanceof Admin verified_admin)
+                        handleAdminMenu(verified_admin);
+                    return;
+                } else
+                    System.out.println("Incorrect Password, Try Again");
+            } else
+                System.out.println("Incorrect Email, Try again");
+
+            attempts--;
+            System.out.println("Attempts remaining: " + attempts);
         }
+
+        System.out.println("Too many failed attempts to login.");
+        throw new InvalidLoginException("Too many failed attempts to login.");
     }
-    */
 
     private static void handleAdminMenu(Admin verified_admin) {
         Scanner scanner = new Scanner(System.in);
