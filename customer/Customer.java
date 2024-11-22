@@ -589,6 +589,10 @@ public class Customer extends User implements Serializable {
         }
     }
 
+    public Map<FoodItem, Integer> getCartMap() {
+        return cartMap;
+    }
+
     public static Map<FoodItem, String> getItemReviews() {
         return itemReviews;
     }

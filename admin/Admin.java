@@ -261,6 +261,11 @@ public class Admin extends User implements Serializable
         System.out.println("-------------------------------------------------------");
     }
 
+    @Override
+    public Map<FoodItem, Integer> getCartMap() {
+        return Map.of();
+    }
+
     public void menuManagementMenu() {
         System.out.println();
         System.out.println("-------------------------------------------------------");

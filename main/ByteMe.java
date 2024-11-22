@@ -16,8 +16,8 @@ public class ByteMe {
     static final String ADMINS_FILE = "admins.dat";
 
     public static HashMap<String, User> Users = new HashMap<>();
-    static ArrayList<Customer> Customers = new ArrayList<>();
-    static ArrayList<Admin> Admins = new ArrayList<>();
+    public static ArrayList<Customer> Customers = new ArrayList<>();
+    public static ArrayList<Admin> Admins = new ArrayList<>();
 
     public static void main(String[] args)
     {
@@ -124,6 +124,33 @@ public class ByteMe {
         }
     }
 
+   public static void authenticate_user(String role) throws InvalidLoginException {
+            Scanner sc = new Scanner(System.in);
+            int attempts = 5;
+            while (attempts > 0) {
+                System.out.println("Enter your email id (or type 'back' to go to the previous menu): ");
+                String email = sc.nextLine();
+                if (email.equals("back")) {
+                    return;
+                }
+                System.out.println("Enter your password: ");
+                String password = sc.nextLine();
+
+                User user = Users.get(email);
+                if (user != null && user.getPassword().equals(password)) {
+                    System.out.println("Login successful");
+                    return;
+                } else {
+                    attempts--;
+                    System.out.println("Incorrect Password, Try Again");
+                    System.out.println("Attempts remaining: " + attempts);
+                }
+            }
+            System.out.println("Too many failed attempts to login.");
+            throw new InvalidLoginException("Too many failed attempts to login.");
+    }
+
+    /*
     public static void authenticate_user(String userType) throws InvalidLoginException
     {
         try {
@@ -162,15 +189,13 @@ public class ByteMe {
 
             throw new InvalidLoginException("\nToo many failed attempts to login.");
         }
-        catch (InvalidLoginException e)
-        {
-            System.out.println(e.getMessage());
-        }
         catch (Exception e)
         {
             System.out.println("Error 103 : user authentication " + e.getMessage());
+            e.printStackTrace();
         }
     }
+    */
 
     private static void handleAdminMenu(Admin verified_admin) {
         Scanner scanner = new Scanner(System.in);

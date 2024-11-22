@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public abstract class User implements Systeminterface, Serializable
 {
@@ -42,5 +43,11 @@ public abstract class User implements Systeminterface, Serializable
 
     protected String getName() {
         return name;
+    }
+
+    public abstract Map<FoodItem, Integer> getCartMap();
+
+    public String getUserId() {
+        return email;
     }
 }
