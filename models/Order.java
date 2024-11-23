@@ -4,6 +4,7 @@ import utils.OrderManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -13,7 +14,7 @@ import java.util.List;
 public class Order implements Serializable
 {
     private static final long serialVersionUID = 1L;
-    private static int idCounter = 1;
+    public static int idCounter = 1;
     private final int orderId;
     private final String customerType;
     private final List<FoodItem> items;
@@ -122,8 +123,25 @@ public class Order implements Serializable
         return this;
     }
 
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeObject(totalForDay);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        totalForDay = (HashMap<LocalDate, Double>) in.readObject();
+    }
+
+    public static void setIdCounter(int idCounter) {
+        Order.idCounter = idCounter;
+    }
+
+    /*
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         //OrderManager.getInstance();
     }
+
+     */
 }

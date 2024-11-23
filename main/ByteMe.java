@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ByteMe {
-    static final String USERS_FILE = "users.dat";
-    static final String CUSTOMERS_FILE = "customers.dat";
-    static final String ADMINS_FILE = "admins.dat";
+    static final String USERS_FILE = "users.ser";
+    static final String CUSTOMERS_FILE = "customers.ser";
+    static final String ADMINS_FILE = "admins.ser";
 
     public static HashMap<String, User> Users = new HashMap<>();
     public static ArrayList<Customer> Customers = new ArrayList<>();
@@ -248,7 +248,7 @@ public class ByteMe {
             Admins = (ArrayList<Admin>) adminInput.readObject();
 
         } catch (FileNotFoundException e) {
-            System.out.println("No previous data found. Starting fresh.");
+            System.out.println("No existing data was found.");
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading data: " + e.getMessage());
         }

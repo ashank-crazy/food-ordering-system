@@ -540,7 +540,7 @@ public class Customer extends User implements Serializable {
     }
 
     public void loadCustomerData() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.dat"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.ser"))) {
             Object data = ois.readObject();
             if (data instanceof List) {
                 @SuppressWarnings("unchecked")
@@ -556,10 +556,10 @@ public class Customer extends User implements Serializable {
                     this.currentOrder = customer.currentOrder;
                     System.out.println("Customer data loaded successfully.");
                 } else {
-                    System.out.println("No matching customer found in customers.dat.");
+                    System.out.println("No matching customer found in customers.ser");
                 }
             } else {
-                System.out.println("Invalid data format in customers.dat.");
+                System.out.println("Invalid data format in customers.ser");
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Failed to load customer data or no data exists.");
@@ -569,7 +569,7 @@ public class Customer extends User implements Serializable {
     public void saveCustomerData() {
         List<Customer> customers = new ArrayList<>();
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.dat"))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("customers.ser"))) {
             Object data = ois.readObject();
             if (data instanceof List) {
                         customers = (List<Customer>) data;
@@ -581,7 +581,7 @@ public class Customer extends User implements Serializable {
         customers.removeIf(c -> c.getEmail().equals(this.getEmail()));
         customers.add(this);
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("customers.dat"))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("customers.ser"))) {
             oos.writeObject(customers);
             System.out.println("Customer data saved successfully.");
         } catch (IOException e) {

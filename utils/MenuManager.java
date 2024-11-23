@@ -10,7 +10,7 @@ public class MenuManager implements Serializable {
     private static final long serialVersionUID = 1L;
     private static MenuManager instance;
     private final List<FoodItem> menu = new ArrayList<>();
-    private static final String MENU_FILE = "menu.dat";
+    private static final String MENU_FILE = "menu.ser";
 
     public MenuManager() {
     }
@@ -36,15 +36,11 @@ public class MenuManager implements Serializable {
         menu.add(item);
         saveMenu();
 
-
-
-        // for debugging, plss remove
-        System.out.println("Item added successfully: " + item);
+        System.out.println("\nItem added successfully: " + item);
         System.out.println("Current Menu:");
         for (FoodItem menuItem : menu) {
             System.out.println(menuItem);
         }
-
 
 
         System.out.println("Item added successfully: " + item);
@@ -82,12 +78,8 @@ public class MenuManager implements Serializable {
         menu.remove(item);
         saveMenu();
 
-
-        // for debugging, plss remove
-        System.out.println("Item removed successfully: " + item);
-        System.out.println("Current Menu:");
-
-
+        System.out.println("\nItem removed successfully: " + item);
+        System.out.println("Current Menu : ");
 
         for (FoodItem menuItem : menu) {
             System.out.println(menuItem);

@@ -12,7 +12,7 @@ public class OrderManager implements Serializable
     private static transient volatile OrderManager instance;
     private final PriorityQueue<Order> orderQueue;
     private static final Map<Integer, String> specialRequests = new HashMap<>();
-    private static final String ORDERS_FILE = "orders.dat";
+    private static final String ORDERS_FILE = "orders.ser";
 
 
     public static class OrderPriorityComparator implements Comparator<Order>, Serializable {
@@ -34,6 +34,7 @@ public class OrderManager implements Serializable
     public void saveOrders() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ORDERS_FILE))) {
             oos.writeObject(orderQueue);
+            oos.writeInt(Order.idCounter);
         } catch (IOException e) {
             System.out.println("Failed to save orders: " + e.getMessage());
         }
@@ -42,7 +43,8 @@ public class OrderManager implements Serializable
     public void loadOrders() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ORDERS_FILE))) {
             PriorityQueue<Order> loadedOrders = (PriorityQueue<Order>) ois.readObject();
-            // to clear the existing queue
+            int loadedIdCounter = ois.readInt();
+            Order.setIdCounter(loadedIdCounter);
             orderQueue.clear();
             orderQueue.addAll(loadedOrders);
         } catch (FileNotFoundException e) {

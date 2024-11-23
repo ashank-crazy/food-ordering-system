@@ -1,6 +1,8 @@
 package main;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.util.List;
 import models.FoodItem;
@@ -9,19 +11,27 @@ import utils.OrderManager;
 
 public class PendingOrdersPanel extends JPanel {
     private OrderManager orderManager;
-    private JTextArea ordersTextArea;
+    private DefaultTableModel tableModel;
+    private JTable ordersTable;
 
     public PendingOrdersPanel() {
         orderManager = OrderManager.getInstance();
         setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("Pending Orders", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         add(titleLabel, BorderLayout.NORTH);
 
-        ordersTextArea = new JTextArea();
-        ordersTextArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(ordersTextArea);
+        String[] columnNames = {"Order ID", "Items", "Status"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        ordersTable = new JTable(tableModel);
+
+        JTableHeader header = ordersTable.getTableHeader();
+        header.setFont(new Font("Arial", Font.BOLD, 20));
+
+        ordersTable.setFont(new Font("Arial", Font.PLAIN, 18));
+        ordersTable.setRowHeight(30);
+        JScrollPane scrollPane = new JScrollPane(ordersTable);
         add(scrollPane, BorderLayout.CENTER);
 
         refreshOrders();
@@ -29,14 +39,17 @@ public class PendingOrdersPanel extends JPanel {
 
     public void refreshOrders() {
         List<Order> pendingOrders = orderManager.getPendingOrders();
-        ordersTextArea.setText("");
+        tableModel.setRowCount(0);
         for (Order order : pendingOrders) {
-            ordersTextArea.append("Order ID: " + order.getOrderId() + "\n");
-            ordersTextArea.append("Items: \n");
+            StringBuilder items = new StringBuilder();
             for (FoodItem item : order.getItems()) {
-                ordersTextArea.append("  - " + item.getName() + "\n");
+                items.append(item.getName()).append(", ");
             }
-            ordersTextArea.append("Status: " + order.getStatus() + "\n\n");
+            if (items.length() > 0) {
+                items.setLength(items.length() - 2);
+            }
+            Object[] row = {order.getOrderId(), items.toString(), order.getStatus()};
+            tableModel.addRow(row);
         }
     }
 }
